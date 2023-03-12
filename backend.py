@@ -53,3 +53,16 @@ def removeFromCart():
             msg = "error occured"
     conn.close()
     return redirect(url_for('root'))
+@app.route("/displayCategory")
+def displayCategory():
+        loggedIn, firstName, noOfItems = getLoginDetails()
+        categoryId = request.args.get("categoryId")
+        with sqlite3.connect('database.db') as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT products.productId, products.name, products.price, products.image, categories.name FROM products, categories WHERE products.categoryId = categories.categoryId AND categories.categoryId = ?", (categoryId, ))
+            data = cur.fetchall()
+        conn.close()
+        categoryName = data[0][4]
+        data = parse(data)
+        return render_template('displayCategory.html', data=data, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, categoryName=categoryName)
+
