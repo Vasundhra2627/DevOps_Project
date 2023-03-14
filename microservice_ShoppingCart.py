@@ -38,3 +38,21 @@ def get_cart():
         return jsonify(cart)
     else:
         return jsonify({'message': 'Cart is empty.'})
+    
+    @app.route('/remove_from_cart', methods=['DELETE'])
+def remove_from_cart():
+    data = request.json
+    user_id = data['user_id']
+    product_id = data['product_id']
+    
+    # Check if the user has an existing cart
+    if redis_db.exists(user_id):
+        # If the product is in the cart, remove it
+        if redis_db.hexists(user_id, product_id):
+            redis_db.hdel(user_id, product_id)
+            return jsonify({'message': 'Product removed from cart.'})
+        else:
+            return jsonify({'message': 'Product not found in cart.'})
+    else:
+        return jsonify({'message': 'Cart is empty.'})
+

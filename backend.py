@@ -34,35 +34,64 @@ def root():
         categoryData = cur.fetchall()
     itemData = parse(itemData)   
     return render_template('home.html', itemData=itemData, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, categoryData=categoryData)
-@app.route("/removeFromCart")
-def removeFromCart():
-    if 'email' not in session:
-        return redirect(url_for('loginForm'))
-    email = session['email']
-    productId = int(request.args.get('productId'))
+@app.route("/add")
+def admin():
     with sqlite3.connect('database.db') as conn:
         cur = conn.cursor()
-        cur.execute("SELECT userId FROM users WHERE email = ?", (email, ))
-        userId = cur.fetchone()[0]
+        cur.execute("SELECT categoryId, name FROM categories")
+        categories = cur.fetchall()
+    conn.close()
+    return render_template('add.html', categories=categories)
+
+@app.route("/addItem", methods=["GET", "POST"])
+def addItem():
+    if request.method == "POST":
+        name = request.form['name']
+        price = float(request.form['price'])
+        description = request.form['description']
+        stock = int(request.form['stock'])
+        categoryId = int(request.form['category'])
+
+        #Uploading image procedure
+        image = request.files['image']
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        imagename = filename
+        with sqlite3.connect('database.db') as conn:
+            try:
+                cur = conn.cursor()
+                cur.execute('''INSERT INTO products (name, price, description, image, stock, categoryId) VALUES (?, ?, ?, ?, ?, ?)''', (name, price, description, imagename, stock, categoryId))
+                conn.commit()
+                msg="added successfully"
+            except:
+                msg="error occured"
+                conn.rollback()
+        conn.close()
+        print(msg)
+        return redirect(url_for('root'))
+
+@app.route("/remove")
+def remove():
+    with sqlite3.connect('database.db') as conn:
+        cur = conn.cursor()
+        cur.execute('SELECT productId, name, price, description, image, stock FROM products')
+        data = cur.fetchall()
+    conn.close()
+    return render_template('remove.html', data=data)
+
+@app.route("/removeItem")
+def removeItem():
+    productId = request.args.get('productId')
+    with sqlite3.connect('database.db') as conn:
         try:
-            cur.execute("DELETE FROM kart WHERE userId = ? AND productId = ?", (userId, productId))
+            cur = conn.cursor()
+            cur.execute('DELETE FROM products WHERE productID = ?', (productId, ))
             conn.commit()
-            msg = "removed successfully"
+            msg = "Deleted successsfully"
         except:
             conn.rollback()
-            msg = "error occured"
+            msg = "Error occured"
     conn.close()
+    print(msg)
     return redirect(url_for('root'))
-@app.route("/displayCategory")
-def displayCategory():
-        loggedIn, firstName, noOfItems = getLoginDetails()
-        categoryId = request.args.get("categoryId")
-        with sqlite3.connect('database.db') as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT products.productId, products.name, products.price, products.image, categories.name FROM products, categories WHERE products.categoryId = categories.categoryId AND categories.categoryId = ?", (categoryId, ))
-            data = cur.fetchall()
-        conn.close()
-        categoryName = data[0][4]
-        data = parse(data)
-        return render_template('displayCategory.html', data=data, loggedIn=loggedIn, firstName=firstName, noOfItems=noOfItems, categoryName=categoryName)
-
