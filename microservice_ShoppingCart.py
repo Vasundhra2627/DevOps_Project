@@ -1,3 +1,4 @@
+#coode for shopping cart microservice using the flask framework
 from flask import Flask, jsonify, request
 import redis
 
@@ -18,7 +19,6 @@ def add_to_cart():
             current_quantity = int(redis_db.hget(user_id, product_id))
             new_quantity = current_quantity + quantity
             redis_db.hset(user_id, product_id, new_quantity)
-        # Otherwise, add the product to the cart
         else:
             redis_db.hset(user_id, product_id, quantity)
     else:
@@ -30,7 +30,7 @@ def add_to_cart():
 def get_cart():
     user_id = request.args.get('user_id')
     
-    # Check if the user has an existing cart
+  
     if redis_db.exists(user_id):
         cart = {}
         for product_id, quantity in redis_db.hgetall(user_id).items():
@@ -45,9 +45,7 @@ def remove_from_cart():
     user_id = data['user_id']
     product_id = data['product_id']
     
-    # Check if the user has an existing cart
     if redis_db.exists(user_id):
-        # If the product is in the cart, remove it
         if redis_db.hexists(user_id, product_id):
             redis_db.hdel(user_id, product_id)
             return jsonify({'message': 'Product removed from cart.'})
@@ -55,4 +53,8 @@ def remove_from_cart():
             return jsonify({'message': 'Product not found in cart.'})
     else:
         return jsonify({'message': 'Cart is empty.'})
+    
+    
+if __name__ == '__main__':
+    app.run(debug=True)
 
