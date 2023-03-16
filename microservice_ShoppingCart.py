@@ -79,4 +79,22 @@ def add_product_to_cart():
 			cursor = conn.cursor(pymysql.cursors.DictCursor)
 			cursor.execute("SELECT * FROM product WHERE code=%s", _code)
 			row = cursor.fetchone()
+			
+			itemArray = { row['code'] : {'name' : row['name'], 'code' : row['code'], 'quantity' : _quantity, 'price' : row['price'], 'image' : row['image'], 'total_price': _quantity * row['price']}}
+			
+			all_total_price = 0
+			all_total_quantity = 0
+			
+			session.modified = True
+			if 'cart_item' in session:
+				if row['code'] in session['cart_item']:
+					for key, value in session['cart_item'].items():
+						if row['code'] == key:
+							#session.modified = True
+							#if session['cart_item'][key]['quantity'] is not None:
+							#	session['cart_item'][key]['quantity'] = 0
+							old_quantity = session['cart_item'][key]['quantity']
+							total_quantity = old_quantity + _quantity
+							session['cart_item'][key]['quantity'] = total_quantity
+							session['cart_item'][key]['total_price'] = total_quantity * row['price']
 
