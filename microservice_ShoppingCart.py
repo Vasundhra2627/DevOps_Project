@@ -90,11 +90,26 @@ def add_product_to_cart():
 				if row['code'] in session['cart_item']:
 					for key, value in session['cart_item'].items():
 						if row['code'] == key:
-							#session.modified = True
+								#session.modified = True
 							#if session['cart_item'][key]['quantity'] is not None:
 							#	session['cart_item'][key]['quantity'] = 0
 							old_quantity = session['cart_item'][key]['quantity']
 							total_quantity = old_quantity + _quantity
 							session['cart_item'][key]['quantity'] = total_quantity
 							session['cart_item'][key]['total_price'] = total_quantity * row['price']
+				else:
+					session['cart_item'] = array_merge(session['cart_item'], itemArray)
+
+				for key, value in session['cart_item'].items():
+					individual_quantity = int(session['cart_item'][key]['quantity'])
+					individual_price = float(session['cart_item'][key]['total_price'])
+					all_total_quantity = all_total_quantity + individual_quantity
+					all_total_price = all_total_price + individual_price
+			else:
+				session['cart_item'] = itemArray
+				all_total_quantity = all_total_quantity + _quantity
+				all_total_price = all_total_price + _quantity * row['price']
+			session['all_total_quantity'] = all_total_quantity
+			session['all_total_price'] = all_total_price
+							
 
