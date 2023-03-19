@@ -1,4 +1,5 @@
-#coode for shopping cart microservice using the flask framework
+#this file contains the code for shopping cart microservice, one of the microservices that we are going to use in the project
+#coode is written in python language using the flask framework
 from flask import Flask, jsonify, request
 import redis
 
