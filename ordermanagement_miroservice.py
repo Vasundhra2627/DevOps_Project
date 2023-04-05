@@ -1,1 +1,2 @@
-//in this we basically define the function to manage the cart for the web applications. 
+
+ // Order management microservice handles order CRUD operations and interacts with other services and manage the cart for the web applications.
