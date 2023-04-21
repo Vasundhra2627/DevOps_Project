@@ -1,3 +1,2 @@
 # DevOps_Project
-An E-commerce website
-using microservices architecture.
+An E-commerce website by VTS
