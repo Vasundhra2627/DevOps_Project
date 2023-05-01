@@ -1,1 +1,4 @@
-
+FROM open jdk:11
+EXPOSE 8090
+ADD target/jenkins/jenkins.jar jenkins/jenkins.jar
+ENTRYPOINT ["java", "-jar","/jenkins/jenkins.jar"]
